@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_REPO: "kontarevakate/foodgram-project-react"
-  DOCKER_TAG: "latest"
+  DOCKER_TAG: ${{ github.sha }}
 
 jobs:
   tests:
@@ -27,6 +27,7 @@ jobs:
     - name: Test with flake8
       run: |
         python -m flake8
+
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
@@ -61,7 +62,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker-compose stop
-            sudo docker-compose rm web
+            sudo docker-compose rm backend
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
@@ -70,6 +71,7 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             sudo docker-compose up -d 
+
   send_message:
     runs-on: ubuntu-latest
     needs: deploy
