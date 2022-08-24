@@ -54,7 +54,6 @@ jobs:
     needs: build_and_push_to_docker_hub
     steps:
       - name: executing remote ssh commands to deploy
-        working-directory: ./infra
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -62,6 +61,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            cd infra
             sudo docker-compose stop
             sudo docker-compose rm backend
             touch .env
