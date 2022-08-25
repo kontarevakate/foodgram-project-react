@@ -1,8 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
-from rest_framework.relations import SlugRelatedField
-
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
 from recipes.models import (Tag, Ingredient, IngredientAmount, Recipe, FavoriteRecipe, ShoppingCart)

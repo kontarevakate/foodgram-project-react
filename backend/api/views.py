@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, HttpResponse
 from django.db.models import Sum
+from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
@@ -7,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from recipes.models import Tag, Ingredient, FavoriteRecipe, Recipe, ShoppingCart, IngredientAmount
+
 from .serializers import TagSerializer, IngredientSerializer, RecipeReadSerializer, RecipeCreateSerializer, FavoriteRecipeSerializer, ShoppingCartSerializer
 from .mixins import ListRetrieveViewSet
 from .filters import IngredientSearchFilter, RecipeFilter
@@ -35,6 +37,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return RecipeCreateSerializer
 
+    @transaction.atomic()
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
