@@ -1,17 +1,22 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers
-from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
-from recipes.models import (Tag, Ingredient, IngredientAmount, Recipe, FavoriteRecipe, ShoppingCart)
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+
+from recipes.models import (
+    FavoriteRecipe, Ingredient, IngredientAmount, Recipe, ShoppingCart, Tag
+)
 from users.models import Follow, User
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     first_name = serializers.CharField()
     last_name = serializers.CharField()
 
@@ -20,13 +25,15 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         fields = '__all__'
 
 
-class CustomUserSerializer(UserSerializer):
+class UserSubcribedSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username',
-                  'first_name', 'last_name', 'is_subscribed')
+        fields = (
+            'email', 'id', 'username', 'first_name',
+            'last_name', 'is_subscribed'
+        )
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -68,7 +75,7 @@ class CheckFollowSerializer(serializers.ModelSerializer):
         return obj
 
 
-class FollowSerializer(CustomUserSerializer):
+class FollowSerializer(UserSubcribedSerializer):
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
 
@@ -79,6 +86,7 @@ class FollowSerializer(CustomUserSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.all().count()
+
 
 class TagSerializer(serializers.ModelSerializer):
 
@@ -114,7 +122,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
-    author = CustomUserSerializer()
+    author = UserSubcribedSerializer()
     ingredients = serializers.SerializerMethodField(read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
@@ -137,20 +145,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['author']
 
-    def add_ingredients_and_tags(self, ingredients, recipe):
+    def __create_ingredients(self, ingredients, recipe):
         bulk_list = list()
         for ingredient in ingredients:
             bulk_list.append(IngredientAmount(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount')))
+                amount=ingredient.get('amount'))
+            )
         IngredientAmount.objects.bulk_create(bulk_list)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = super().create(validated_data)
-        return self.add_ingredients_and_tags(
+        return self.__create_ingredients(
             recipe, ingredients=ingredients, tags=tags
         )
 
@@ -158,12 +167,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         if 'ingredients' in validated_data:
             ingredients = validated_data.pop('ingredients')
             instance.ingredients.clear()
-            self.add_ingredients_and_tags(ingredients, instance)
+            self.__create_ingredients(ingredients, instance)
         if 'tags' in validated_data:
             instance.tags.set(
-                validated_data.pop('tags'))
-        return super().update(
-            instance, validated_data)
+                validated_data.pop('tags')
+                )
+        return super().update(instance, validated_data)
 
     def validate(self, data):
         ingredients = data['ingredients']
@@ -188,14 +197,17 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         tags = data['tags']
         if not tags:
             raise serializers.ValidationError(
-                'У рецепта должен быть хотя бы один тег')
+                'У рецепта должен быть хотя бы один тег'
+            )
         return data
 
     def validate_cooking_time(self, time):
         if int(time) < 1:
             raise serializers.ValidationError(
-                'Время приготовления должно быть не меньше 1 минуты')
+                'Время приготовления должно быть не меньше 1 минуты'
+            )
         return time
+
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
 

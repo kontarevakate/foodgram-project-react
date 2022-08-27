@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-
 User = get_user_model()
 
 
@@ -10,15 +9,18 @@ class Tag(models.Model):
     name = models.CharField(
         'Имя',
         max_length=100,
-        unique=True)
+        unique=True
+    )
     color = models.CharField(
         'Цвет',
         max_length=7,
-        unique=True)
+        unique=True
+    )
     slug = models.SlugField(
         'Ссылка',
         max_length=100,
-        unique=True)
+        unique=True
+    )
 
     class Meta:
         verbose_name = 'Тэг'
@@ -32,10 +34,12 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         'Название ингредиента',
-        max_length=100)
+        max_length=100
+    )
     measurement_unit = models.CharField(
         'Единица измерения ингредиента',
-        max_length=100)
+        max_length=100
+    )
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -107,7 +111,7 @@ class IngredientAmount(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         default=1,
         validators=[
             MinValueValidator(
@@ -177,6 +181,8 @@ class ShoppingCart(models.Model):
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'
         constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_user_list')
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_list'
+            )
         ]
