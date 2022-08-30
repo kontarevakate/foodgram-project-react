@@ -21,8 +21,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '09#d0d1o%9^tc(zmkb8$)i-7#b)!(0twepv(g2!fzsnn&du!&_'
-
-RECIPES_ON_PAGE = 6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -143,7 +141,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.LimitPageNumberPagination',
-    'PAGE_SIZE': RECIPES_ON_PAGE,
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
