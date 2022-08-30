@@ -25,6 +25,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ../build:/usr/share/nginx/html/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
     depends_on:
