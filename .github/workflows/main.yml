@@ -78,9 +78,8 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd foodgram-project-react/infra
-            sudo docker-compose stop
-            sudo docker-compose rm backend
-            cd foodgram-project-react/infra
+            sudo docker-compose stop || true
+            sudo docker-compose rm backend || true
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
