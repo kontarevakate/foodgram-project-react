@@ -53,15 +53,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
     steps:
-      - name: Copy folder "infra" to server
-        uses: garygrossgarten/github-action-scp@release
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@master
         with:
-          local: infra
-          remote: foodgram-project-react/infra
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          privateKey: ${{ secrets.SSH_KEY }}
-          passphrase : ${{ secrets.PASSPHRASE }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          source: "infra"
+          target: "foodgram-project-react/infra"
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
