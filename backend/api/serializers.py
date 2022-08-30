@@ -169,7 +169,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         if 'tags' in validated_data:
             instance.tags.set(
                 validated_data.pop('tags')
-                )
+            )
         return super().update(instance, validated_data)
 
     def validate(self, data):
