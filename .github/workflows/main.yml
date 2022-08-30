@@ -77,8 +77,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            export DOCKER_REPO=${{ env.DOCKER_REPO }}
-            export DOCKER_TAG=${{ env.DOCKER_TAG }}
+            sudo export DOCKER_REPO=${{ env.DOCKER_REPO }}
+            sudo export DOCKER_TAG=${{ env.DOCKER_TAG }}
             cd foodgram-project-react/infra
             # sudo docker-compose stop || true
             # sudo docker-compose rm backend || true
