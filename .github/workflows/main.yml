@@ -77,8 +77,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo export DOCKER_REPO=${{ env.DOCKER_REPO }}
-            sudo export DOCKER_TAG=${{ env.DOCKER_TAG }}
             cd foodgram-project-react/infra
             # sudo docker-compose stop || true
             # sudo docker-compose rm backend || true
@@ -89,7 +87,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker-compose up -d --force-recreate
+            sudo DOCKER_REPO=${{ env.DOCKER_REPO }} DOCKER_TAG=${{ env.DOCKER_TAG }} docker-compose up -d --force-recreate
 
   # send_message:
   #   runs-on: ubuntu-latest
