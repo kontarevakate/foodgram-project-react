@@ -1,5 +1,6 @@
 [flake8]
 exclude =
-    */migrations/
+    ./backend/*/migrations/
     __pycache__
+    ./backend/*/settings.py
     settings.py

@@ -42,14 +42,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def __post(request, pk, serializers):
+    def __post(self, request, pk, serializers):
         data = {'user': request.user.id, 'recipe': pk}
         serializer = serializers(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def __delete(request, pk, model):
+    def __delete(self, request, pk, model):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         model_obj = get_object_or_404(model, user=user, recipe=recipe)
@@ -86,7 +86,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             request=request, pk=pk, model=ShoppingCart
         )
 
-    def create_shopping_cart(ingredients):
+    def create_shopping_cart(self, ingredients):
         shopping_cart = '\n'.join([
             f'{ingredient["ingredient__name"]}: {ingredient["amount"]}'
             f'{ingredient["ingredient__measurement_unit"]}'
