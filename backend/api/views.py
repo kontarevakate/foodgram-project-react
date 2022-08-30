@@ -1,21 +1,19 @@
 from django.db import transaction
 from django.db.models import Sum
 from django.shortcuts import HttpResponse, get_object_or_404
+from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                            Recipe, ShoppingCart, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 
-from recipes.models import (
-    FavoriteRecipe, Ingredient, IngredientAmount, Recipe, ShoppingCart, Tag
-)
 from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import ListRetrieveViewSet
 from .permissions import IsAdminOrReadOnly
-from .serializers import (
-    FavoriteRecipeSerializer, IngredientSerializer, RecipeCreateSerializer,
-    RecipeReadSerializer, ShoppingCartSerializer, TagSerializer
-)
+from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
+                          RecipeCreateSerializer, RecipeReadSerializer,
+                          ShoppingCartSerializer, TagSerializer)
 
 
 class TagViewSet(ListRetrieveViewSet):
