@@ -9,4 +9,4 @@ echo "Load ingredients..."
 python manage.py load_data
 
 echo "Start foodgram..."
-gunicorn foodgram.wsgi:application --bind 127.0.0.1:8000
+gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
