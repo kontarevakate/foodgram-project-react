@@ -9,7 +9,7 @@ services:
       - .env
 
   backend:
-    image: ${DOCKER_REPO:-kontarevakate/foodgram-project-react}:${DOCKER_TAG:-3ea45b3461161aae4fae16ffee340425bd9cf77f}
+    image: ${DOCKER_REPO:-kontarevakate/foodgram-project-react}:backend_${DOCKER_TAG:-3ea45b3461161aae4fae16ffee340425bd9cf77f}
     restart: always
     volumes:
       - static_value:/app/static/
@@ -19,13 +19,21 @@ services:
     env_file:
       - .env
 
+  frontend:
+    image: ${DOCKER_REPO:-kontarevakate/foodgram-project-react}:frontend_${DOCKER_TAG:-3ea45b3461161aae4fae16ffee340425bd9cf77f}
+    volumes:
+      - ../frontend/:/app/result_build/
+    depends_on:
+      - backend
+
   nginx:
     image: nginx:1.21.3-alpine
     ports:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
-      - ../build:/usr/share/nginx/html/
+      - - ../docs/:/usr/share/nginx/html/api/docs/
+      - - ../frontend/build:/usr/share/nginx/html/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
     depends_on:
