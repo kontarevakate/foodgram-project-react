@@ -37,12 +37,12 @@ class UserSubcribedSerializer(UserSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Follow.objects.filter(user=user, following=obj.id).exists()
+        return Follow.objects.filter(author=obj.id).exists()
 
 
 class CheckFollowSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('user', 'following')
+        fields = ('user', 'author')
         read_only_fields = ('user',)
         model = Follow
 
