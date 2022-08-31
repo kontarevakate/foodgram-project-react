@@ -130,8 +130,4 @@ dmypy.json
 
 # .idea
 .idea
-data 
-docs
-frontend
-infra
 .github

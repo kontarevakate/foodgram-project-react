@@ -6,7 +6,7 @@ echo "Collect static..."
 python manage.py collectstatic --no-input
 
 echo "Load ingredients..."
-python manage.py loaddata ingredients.csv
+python manage.py loaddata ingredients.json
 
 echo "Start foodgram..."
 gunicorn foodgram.wsgi:application --bind 127.0.0.1:8000
