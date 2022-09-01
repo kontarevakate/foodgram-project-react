@@ -1,16 +1,17 @@
 from django.db import transaction
 from django.db.models import Sum, Value, OuterRef, BooleanField, Exists
 from django.shortcuts import HttpResponse, get_object_or_404
+
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import ListRetrieveViewSet
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           ShoppingCartSerializer, TagSerializer)
@@ -20,10 +21,12 @@ class TagViewSet(ListRetrieveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+    permission_classes = (AllowAny,)
 
 
 class IngredientViewSet(ListRetrieveViewSet):
     queryset = Ingredient.objects.all()
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = [IngredientSearchFilter]
@@ -31,7 +34,7 @@ class IngredientViewSet(ListRetrieveViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (OwnerOrReadOnly,)
     filter_class = RecipeFilter
 
     def get_serializer_class(self):
