@@ -19,7 +19,7 @@ from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           ShoppingCartSerializer, TagSerializer, 
-                          RecipeAddingSerializer, FollowSerializer, CheckFollowSerialize,
+                          RecipeAddingSerializer, FollowSerializer, CheckFollowSerializer,
                           UserSubcribedSerializer)
 
 
