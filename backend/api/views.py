@@ -1,7 +1,6 @@
 from django.db import transaction
 from django.db.models import Sum, Value, OuterRef, BooleanField, Exists
 from django.shortcuts import HttpResponse, get_object_or_404
-from backend.api.pagination import LimitPageNumberPagination
 from djoser.views import UserViewSet
 
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
@@ -13,6 +12,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
+from .pagination import LimitPageNumberPagination
 from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import ListRetrieveViewSet
 from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
