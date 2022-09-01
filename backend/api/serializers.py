@@ -130,12 +130,21 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = IngredientAmount
+        fields = ('id', 'amount')
+
+
 class RecipeCreateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all()
     )
-    ingredients = serializers.SerializerMethodField()
+    ingredients = CreateIngredientRecipeSerializer(many=True)
     image = Base64ImageField()
 
     class Meta:
