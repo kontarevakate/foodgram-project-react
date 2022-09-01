@@ -1,9 +1,12 @@
 from django.db import transaction
 from django.db.models import Sum, Value, OuterRef, BooleanField, Exists
 from django.shortcuts import HttpResponse, get_object_or_404
+from djoser.views import UserViewSet
 
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Tag)
+from users.models import User, Follow
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, AllowAny
@@ -15,7 +18,7 @@ from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           ShoppingCartSerializer, TagSerializer, 
-                          RecipeAddingSerializer)
+                          RecipeAddingSerializer, FollowSerializer, CheckFollowSerializer)
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -111,3 +114,54 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(shopping_cart, content_type='text')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
+
+class FollowViewSet(UserViewSet):
+    @action(
+        methods=['post'],
+        detail=True,
+        permission_classes=[IsAuthenticated]
+    )
+    @transaction.atomic()
+    def subscribe(self, request, id=None):
+
+        user = request.user
+        author = get_object_or_404(User, pk=id)
+        data = {
+            'user': user.id,
+            'author': author.id,
+        }
+        serializer = CheckFollowSerializer(
+            data=data,
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+        result = Follow.objects.create(user=user, author=author)
+        serializer = FollowSerializer(result, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    @transaction.atomic()
+    def del_subscribe(self, request, id=None):
+        user = request.user
+        author = get_object_or_404(User, pk=id)
+        data = {
+            'user': user.id,
+            'author': author.id,
+        }
+        serializer = CheckFollowSerializer(
+            data=data,
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+        user.follower.filter(author=author).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        user = request.user
+        queryset = user.follower.all()
+        pages = self.paginate_queryset(queryset)
+        serializer = FollowSerializer(
+            pages, many=True, context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
