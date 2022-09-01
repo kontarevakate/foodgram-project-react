@@ -97,7 +97,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -152,6 +152,40 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['author']
 
+    def validate(self, data):
+        ingredients = data['ingredients']
+        ingredient_list = []
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Кол-во ингредиентов не должно быть меньше 1'
+            )
+        for item in ingredients:
+            ingredient = get_object_or_404(
+                Ingredient, id=item['id']
+            )
+            if ingredient in ingredient_list:
+                raise serializers.ValidationError(
+                    'Ингредиенты не должны повторяться'
+                )
+            if int(item.get('amount')) < 1:
+                raise serializers.ValidationError(
+                    'Минимальное кол-во - 1'
+                )
+            ingredient_list.append(ingredient)
+        tags = data['tags']
+        if not tags:
+            raise serializers.ValidationError(
+                'У рецепта должен быть хотя бы один тег'
+            )
+        return data
+
+    def validate_cooking_time(self, time):
+        if int(time) < 1:
+            raise serializers.ValidationError(
+                'Время приготовления должно быть не меньше 1 минуты'
+            )
+        return time
+
     def __create_ingredients(self, ingredients, recipe):
         bulk_list = list()
         for ingredient in ingredients:
@@ -181,40 +215,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             )
         return super().update(instance, validated_data)
 
-    def validate(self, data):
-        ingredients = data['ingredients']
-        ingredient_list = []
-        if not ingredients:
-            raise serializers.ValidationError(
-                'Кол-во ингредиентов не должно быть меньше 1'
-            )
-        for item in ingredients:
-            ingredient = get_object_or_404(
-                Ingredient, id=item['id']
-            )
-            if ingredient in ingredient_list:
-                raise serializers.ValidationError(
-                    'Ингредиенты н едолжны повторяться'
-                )
-            if int(item.get('amount')) < 1:
-                raise serializers.ValidationError(
-                    'Минимальное кол-во - 1'
-                )
-            ingredient_list.append(ingredient)
-        tags = data['tags']
-        if not tags:
-            raise serializers.ValidationError(
-                'У рецепта должен быть хотя бы один тег'
-            )
-        return data
-
-    def validate_cooking_time(self, time):
-        if int(time) < 1:
-            raise serializers.ValidationError(
-                'Время приготовления должно быть не меньше 1 минуты'
-            )
-        return time
-
+    def to_representation(self, instance):
+        context = self.context
+        return RecipeReadSerializer(instance, context=context).data
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
