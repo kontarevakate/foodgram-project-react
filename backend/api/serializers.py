@@ -188,22 +188,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return time
 
     def __create_ingredients(self, ingredients, recipe):
-        bulk_list = list()
         for ingredient in ingredients:
-            bulk_list.append(IngredientAmount(
+            IngredientAmount.objects.create(
                 recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'))
+                ingredient_id=ingredient['id'],
+                amount=ingredient['amount'],
             )
-        IngredientAmount.objects.bulk_create(bulk_list)
 
     def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        recipe = super().create(validated_data)
-        return self.__create_ingredients(
-            recipe, ingredients=ingredients, tags=tags
-        )
+        tags_data = validated_data.pop('tags')
+        ingredients_data = validated_data.pop('ingredients')
+        image = validated_data.pop('image')
+        recipe = Recipe.objects.create(image=image, **validated_data)
+        self.create_ingredients(ingredients_data, recipe)
+        recipe.tags.set(tags_data)
+        return recipe
 
     def update(self, instance, validated_data):
         if 'ingredients' in validated_data:
