@@ -6,6 +6,7 @@ from .models import (FavoriteRecipe, Ingredient, IngredientAmount, Recipe,
 
 class TagAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'name',
         'color',
         'slug',
@@ -14,6 +15,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'name',
         'measurement_unit',
     )
@@ -22,6 +24,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'name',
         'author',
     )
@@ -31,6 +34,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 class IngredientAmountAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'recipe',
         'ingredient',
         'amount',
@@ -39,6 +43,7 @@ class IngredientAmountAdmin(admin.ModelAdmin):
 
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'user',
         'recipe',
     )
@@ -46,6 +51,7 @@ class FavoriteRecipeAdmin(admin.ModelAdmin):
 
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'user',
         'recipe',
     )
