@@ -22,6 +22,12 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 
+class AmountIngredients(admin.TabularInline):
+    model = IngredientAmount
+    extra = 1
+    min_num = 1
+
+
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -30,6 +36,9 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = ('name', 'author', 'tags')
     search_fields = ('name', 'author', 'tags')
+    filter_horizontal = ('ingredients',)
+    inlines = [AmountIngredients,]
+
 
 
 class IngredientAmountAdmin(admin.ModelAdmin):
