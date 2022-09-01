@@ -135,7 +135,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
         read_only_fields = ('is_favorite', 'is_shopping_cart',)
-        
+
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
         if user.is_anonymous:
@@ -215,7 +215,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients_data = validated_data.pop('ingredients')
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, **validated_data)
-        self.create_ingredients(ingredients_data, recipe)
+        self.__create_ingredients(ingredients_data, recipe)
         recipe.tags.set(tags_data)
         return recipe
 
