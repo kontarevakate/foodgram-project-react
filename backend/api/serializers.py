@@ -133,6 +133,12 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
+
 
 class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
