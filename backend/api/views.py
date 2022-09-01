@@ -14,7 +14,8 @@ from .mixins import ListRetrieveViewSet
 from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
-                          ShoppingCartSerializer, TagSerializer)
+                          ShoppingCartSerializer, TagSerializer, 
+                          RecipeAddingSerializer)
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -62,18 +63,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def __post(self, request, pk, serializers):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = serializers(data=data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    def __post(self, model, user, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(user=user, recipe=recipe)
+        serializer = RecipeAddingSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def __delete(self, request, pk, model):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        model_obj = get_object_or_404(model, user=user, recipe=recipe)
-        model_obj.delete()
+    def __delete(self, model, user, pk):
+        model.objects.filter(user=user, recipe__id=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # @action(
@@ -122,6 +119,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.__post(ShoppingCart, request.user, pk)
         elif request.method == 'DELETE':
             return self.__delete(ShoppingCart, request.user, pk)
+
     def create_shopping_cart(self, ingredients):
         shopping_cart = '\n'.join([
             f'{ingredient["ingredient__name"]}: {ingredient["amount"]}'

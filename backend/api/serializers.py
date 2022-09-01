@@ -247,6 +247,12 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             )
         ]
 
+class RecipeAddingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('id', 'name', 'image', 'cooking_time')
+
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
 
