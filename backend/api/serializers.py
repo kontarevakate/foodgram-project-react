@@ -90,8 +90,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = '__all__'
-
+        fields = ('id', 'name', 'color', 'slug')
 
 class IngredientSerializer(serializers.ModelSerializer):
 
@@ -119,11 +118,16 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)
+    image = Base64ImageField(max_length=None, use_url=True)
+    tags = TagSerializer(read_only=True, many=True)
     author = UserSubcribedSerializer()
-    ingredients = serializers.SerializerMethodField(read_only=True)
-    is_favorited = serializers.SerializerMethodField(read_only=True)
-    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    ingredients = IngredientAmountSerializer(
+        source='recipe_ingredient',
+        many=True,
+        read_only=True,
+    )
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -140,17 +144,14 @@ class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Tag.objects.all()
-    )
+    author = UserSubcribedSerializer(read_only=True)
     ingredients = CreateIngredientRecipeSerializer(many=True)
-    image = Base64ImageField()
+    image = Base64ImageField(max_length=None, use_url=True)
 
     class Meta:
         model = Recipe
-        fields = '__all__'
-        read_only_fields = ['author']
+        fields = ('author', 'tags', 'ingredients', 'name',
+                  'image', 'text', 'cooking_time')
 
     def validate(self, data):
         ingredients = data['ingredients']
