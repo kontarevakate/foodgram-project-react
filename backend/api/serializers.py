@@ -238,7 +238,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FavoriteRecipe
-        fields = ['favorite', 'recipe']
+        fields = ['user', 'recipe']
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=FavoriteRecipe.objects.all(),

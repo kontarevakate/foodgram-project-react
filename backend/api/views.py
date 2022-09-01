@@ -62,50 +62,64 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def __post(self, request, pk, serializers):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = serializers(data=data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # def __post(self, request, pk, serializers):
+    #     data = {'user': request.user.id, 'recipe': pk}
+    #     serializer = serializers(data=data, context={'request': request})
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def __delete(self, request, pk, model):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        model_obj = get_object_or_404(model, user=user, recipe=recipe)
-        model_obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def __delete(self, request, pk, model):
+    #     user = request.user
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     model_obj = get_object_or_404(model, user=user, recipe=recipe)
+    #     model_obj.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        detail=True, methods=['POST'],
-        permission_classes=[IsAuthenticated],
-    )
-    def post_favorite(self, request, pk):
-        return self.__post(
-            request=request, pk=pk, serializers=FavoriteRecipeSerializer
-        )
+    # @action(
+    #     detail=True, methods=['POST'],
+    #     permission_classes=[IsAuthenticated],
+    # )
+    # def post_favorite(self, request, pk):
+    #     return self.__post(
+    #         request=request, pk=pk, serializers=FavoriteRecipeSerializer
+    #     )
 
-    @post_favorite.mapping.delete
-    def delete_favorite(self, request, pk):
-        return self.__delete(
-            request=request, pk=pk, model=FavoriteRecipe
-        )
+    # @post_favorite.mapping.delete
+    # def delete_favorite(self, request, pk):
+    #     return self.__delete(
+    #         request=request, pk=pk, model=FavoriteRecipe
+    #     )
 
-    @action(
-        detail=True, methods=['POST'],
-        permission_classes=[IsAuthenticated],
-    )
-    def post_shopping_cart(self, request, pk):
-        return self.__post(
-            request=request, pk=pk, serializers=ShoppingCartSerializer
-        )
+    # @action(
+    #     detail=True, methods=['POST'],
+    #     permission_classes=[IsAuthenticated],
+    # )
+    # def post_shopping_cart(self, request, pk):
+    #     return self.__post(
+    #         request=request, pk=pk, serializers=ShoppingCartSerializer
+    #     )
 
-    @post_shopping_cart.mapping.delete
-    def delete_shopping_cart(self, request, pk):
-        return self.__delete(
-            request=request, pk=pk, model=ShoppingCart
-        )
+    # @post_shopping_cart.mapping.delete
+    # def delete_shopping_cart(self, request, pk):
+    #     return self.__delete(
+    #         request=request, pk=pk, model=ShoppingCart
+    #     )
+    @action(detail=True, methods=('post', 'delete'),
+            permission_classes=(IsAuthenticated,))
+    def favorite(self, request, pk=None):
+        if request.method == 'POST':
+            return self.add_obj(FavoriteRecipe, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(FavoriteRecipe, request.user, pk)
 
+    @action(detail=True, methods=('post', 'delete'),
+            permission_classes=(IsAuthenticated,))
+    def shopping_cart(self, request, pk=None):
+        if request.method == 'POST':
+            return self.add_obj(ShoppingCart, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(ShoppingCart, request.user, pk)
     def create_shopping_cart(self, ingredients):
         shopping_cart = '\n'.join([
             f'{ingredient["ingredient__name"]}: {ingredient["amount"]}'
