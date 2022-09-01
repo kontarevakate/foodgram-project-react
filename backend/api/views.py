@@ -127,25 +127,25 @@ class FollowViewSet(UserViewSet):
         methods=['post', 'delete'],
         permission_classes=[IsAuthenticated]
     )
-    def subscribe(self, request, **kwargs):
-        user = request.user
-        author_id = self.kwargs.get('id')
-        author = get_object_or_404(User, id=author_id)
-
-        if request.method == 'POST':
-            serializer = FollowSerializer(author,
-                                          data=request.data,
-                                          context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            Follow.objects.create(user=user, author=author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            subscription = get_object_or_404(Follow,
-                                             user=user,
-                                             author=author)
-            subscription.delete()
+    def subscribe(self, request, pk):
+        if request.method != 'POST':
+            subscription = get_object_or_404(
+                Follow,
+                subscribed=get_object_or_404(User, id=pk),
+                user=request.user
+            )
+            self.perform_destroy(subscription)
             return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = FollowSerializer(
+            data={
+                'user': request.user.id,
+                'subscribed': get_object_or_404(User, id=pk).id
+            },
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(
         detail=False,
