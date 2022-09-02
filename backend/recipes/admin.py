@@ -35,9 +35,10 @@ class RecipeAdmin(admin.ModelAdmin):
         'author',
     )
     list_filter = ('name', 'author', 'tags')
-    search_fields = ('name', 'author', 'tags')
-    filter_horizontal = ('ingredients',)
-    inlines = [AmountIngredients,]
+    readonly_fields = ('count_favorites',)
+    
+    def count_favorites(self, obj):
+        return obj.favorites.count()
 
 
 
