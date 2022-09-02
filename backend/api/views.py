@@ -78,6 +78,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         model.objects.filter(user=user, recipe__id=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=['post'],
+            permission_classes=[IsAuthenticated],
+            url_path='favorite')
     def create_favorite(self, request, pk=None):
         data = {'user': request.user.id, 'recipe': pk}
         serializer = FavoriteRecipeSerializer(
