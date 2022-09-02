@@ -1,11 +1,12 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
-from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
-                            Recipe, ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+
 from users.models import Follow, User
+from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                            Recipe, ShoppingCart, Tag)
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -290,7 +291,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='recipe.name')
     image = Base64ImageField(source='recipe.image', read_only=True)
     cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
-    
+
     class Meta:
         model = ShoppingCart
         fields = ['shoppingcart', 'recipe']

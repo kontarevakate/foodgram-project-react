@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Sum, Value, OuterRef, BooleanField, Exists
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import HttpResponse, get_object_or_404
 from djoser.views import UserViewSet
 
@@ -19,18 +20,8 @@ from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           ShoppingCartSerializer, TagSerializer, 
-                          RecipeAddingSerializer, FollowSerializer, CheckFollowSerializer,
+                          FollowSerializer, CheckFollowSerializer,
                           UserSubcribedSerializer, ShortRecipeSerializer)
-
-
-
-class FavoriteViewSet(viewsets.ModelViewSet):
-
-    serializer_class = FavoriteRecipeSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        return FavoriteRecipe.objects.filter(user=user)
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -51,8 +42,10 @@ class IngredientViewSet(ListRetrieveViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (OwnerOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
     queryset = Recipe.objects.all()
+    pagination_class = LimitPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
