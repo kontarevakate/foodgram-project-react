@@ -155,7 +155,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
-        read_only_fields = ('is_favorite', 'is_shopping_cart',)
+        read_only_fields = ('is_favorited', 'is_shopping_cart',)
 
     def get_is_favorited(self, obj):
         user = self.context.get("request").user.id
