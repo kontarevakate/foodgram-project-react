@@ -78,13 +78,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
         model.objects.filter(user=user, recipe__id=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
-    def favorite(self, request, pk=None):
-        if request.method == 'POST':
-            return self.__post(FavoriteRecipe, request.user, pk)
-        elif request.method == 'DELETE':
-            return self.__delete(FavoriteRecipe, request.user, pk)
+    def create_favorite(self, request, pk=None):
+        data = {'user': request.user.id, 'recipe': pk}
+        serializer = FavoriteRecipeSerializer(
+            data=data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @create_favorite.mapping.delete
+    def delete_favorite(self, request, pk=None):
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=pk)
+        favorite = get_object_or_404(FavoriteRecipe, user=user, recipe=recipe)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))

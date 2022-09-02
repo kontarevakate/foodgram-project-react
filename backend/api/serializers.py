@@ -252,14 +252,17 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FavoriteRecipe
-        fields = ['user', 'recipe']
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=FavoriteRecipe.objects.all(),
-                fields=('user', 'recipe'),
-                message='Рецепт уже добавлен в избранное'
+        fields = ('id', 'user', 'recipe')
+
+    def validate(self, data):
+        request = self.context.get('request')
+        recipe = data['recipe']
+        if FavoriteRecipe.objects.filter(user=request.user, recipe=recipe).exists():
+            raise serializers.ValidationError(
+                {'errors': ('Рецепт уже в избранном!')}
             )
-        ]
+        return data
+
 
 class RecipeAddingSerializer(serializers.ModelSerializer):
     class Meta:
