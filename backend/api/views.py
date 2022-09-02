@@ -23,6 +23,16 @@ from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           UserSubcribedSerializer)
 
 
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+
+    serializer_class = FavoriteRecipeSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return FavoriteRecipe.objects.filter(user=user)
+
+
 class TagViewSet(ListRetrieveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer

@@ -151,16 +151,12 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         read_only_fields = ('is_favorite', 'is_shopping_cart',)
 
     def get_is_favorited(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
+        user = self.context.get("request").user.id
+        return FavoriteRecipe.objects.filter(user=user, recipe=obj.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Recipe.objects.filter(list__user=user, id=obj.id).exists()
+        user = self.context.get("request").user.id
+        return ShoppingCart.objects.filter(user=user, recipe=obj.id).exists()
 
 
 class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
@@ -264,6 +260,10 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
                 {'errors': ('Рецепт уже в избранном!')}
             )
         return data
+
+    def to_representation(self, instance):
+        context = {"request": self.context.get("request")}
+        return RecipeReadSerializer(instance.recipe, context=context).data
 
 
 class RecipeAddingSerializer(serializers.ModelSerializer):
