@@ -33,6 +33,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'id',
         'name',
         'author',
+        'count_favorites',
     )
     list_filter = ('name', 'author', 'tags')
     readonly_fields = ('count_favorites',)
