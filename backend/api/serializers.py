@@ -241,7 +241,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return RecipeReadSerializer(instance, context=context).data
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
-
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+    
     class Meta:
         model = FavoriteRecipe
         fields = ('id', 'user', 'recipe')
