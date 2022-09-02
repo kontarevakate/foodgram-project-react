@@ -137,20 +137,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ])
         return shopping_cart
 
-    @action(detail=False, permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'],
+            permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        recipes = IngredientAmount.objects.filter(
-            recipe__shopping_cart__user=request.user
+        ingredients = IngredientAmount.objects.filter(
+            recipe__carts__user=request.user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit'
+        ).annotate(Sum('amount'))
+
+        if not ingredients:
+            return Response(
+                {'error': 'Ваша корзина пуста'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return HttpResponse(
+            self.create_shopping_cart(ingredients),
+            content_type='text/plain'
         )
-        ingredients = recipes.values(
-            'ingredient__name',
-            'ingredient__measurement_unit',
-        ).annotate(amount=Sum('amount'))
-        shopping_cart = self.create_shopping_cart(ingredients)
-        filename = shopping_cart.pdf
-        response = HttpResponse(shopping_cart, content_type='text')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-        return response
 
 
 class FollowViewSet(UserViewSet):
