@@ -73,33 +73,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         model.objects.filter(user=user, recipe__id=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # def base_shopping_cart_favorite(self, model, pk, serializer):
-    #     recipe = get_object_or_404(Recipe, id=pk)
-    #     serializer = serializer(
-    #         data={"user": self.request.user.id, "recipe": recipe.id},
-    #         context={"request": self.request},
-    #     )
-    #     if self.request.method == "POST":
-    #         serializer.is_valid(raise_exception=True)
-    #         serializer.save()
-    #         serializer = RecipeReadSerializer(recipe)
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     object = model.objects.filter(user=self.request.user, recipe=recipe)
-    #     if not object.exists():
-    #         return Response(status=status.HTTP_400_BAD_REQUEST)
-    #     object.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # @action(
-    #     detail=True,
-    #     methods=("POST", "DELETE"),
-    #     url_path="favorite",
-    #     permission_classes=(IsAuthenticated,),
-    # )
-    # def favorite(self, request, pk):
-    #     return self.base_shopping_cart_favorite(
-    #         FavoriteRecipe, pk, FavoriteRecipeSerializer
-    #     )
     @action(detail=True, methods=['post'],
             permission_classes=[IsAuthenticated],
             url_path='favorite')
@@ -137,25 +110,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ])
         return shopping_cart
 
-    @action(detail=False, methods=['get'],
-            permission_classes=[IsAuthenticated])
+    @action(detail=False, permission_classes=[IsAuthenticated], methods=['get'],)
     def download_shopping_cart(self, request):
-        ingredients = IngredientAmount.objects.filter(
-            recipe__carts__user=request.user).values(
-                'ingredient__name',
-                'ingredient__measurement_unit'
-        ).annotate(Sum('amount'))
-
-        if not ingredients:
-            return Response(
-                {'error': 'Ваша корзина пуста'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return HttpResponse(
-            self.create_shopping_cart(ingredients),
-            content_type='text/plain'
+        recipes = IngredientAmount.objects.filter(
+            recipe__shopping_cart__user=request.user
         )
+        ingredients = recipes.values(
+            'ingredient__name',
+            'ingredient__measurement_unit',
+        ).annotate(amount=Sum('amount'))
+        shopping_cart = self.create_shopping_cart(ingredients)
+        filename = shopping_cart.pdf
+        response = HttpResponse(shopping_cart, content_type='text')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
 
 
 class FollowViewSet(UserViewSet):
