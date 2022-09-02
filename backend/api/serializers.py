@@ -8,6 +8,13 @@ from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from users.models import Follow, User
 
 
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = 'id', 'name', 'image', 'cooking_time'
+        read_only_fields = '__all__',
+
+
 class CustomUserCreateSerializer(UserCreateSerializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())]
@@ -243,7 +250,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-    
+
     class Meta:
         model = FavoriteRecipe
         fields = ('id', 'user', 'recipe')

@@ -20,7 +20,7 @@ from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           ShoppingCartSerializer, TagSerializer, 
                           RecipeAddingSerializer, FollowSerializer, CheckFollowSerializer,
-                          UserSubcribedSerializer)
+                          UserSubcribedSerializer, ShortRecipeSerializer)
 
 
 
@@ -73,26 +73,48 @@ class RecipeViewSet(viewsets.ModelViewSet):
         model.objects.filter(user=user, recipe__id=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post'],
-            permission_classes=[IsAuthenticated],
-            url_path='favorite')
-    def create_favorite(self, request, pk=None):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = FavoriteRecipeSerializer(
-            data=data,
-            context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    def add_obj(self, model, user, pk):
+        if model.objects.filter(user=user, recipe__id=pk).exists():
+            return Response({
+                'errors': 'Рецепт уже добавлен в список.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(user=user, recipe=recipe)
+        serializer = ShortRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @create_favorite.mapping.delete
-    def delete_favorite(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        favorite = get_object_or_404(FavoriteRecipe, user=user, recipe=recipe)
-        favorite.delete()
+    def delete_obj(self, model, user, pk):
+        obj = model.objects.filter(user=user, recipe__id=pk)
+        obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=('post', 'delete'),
+            permission_classes=(IsAuthenticated,))
+    def favorite(self, request, pk=None):
+        if request.method == 'POST':
+            return self.add_obj(FavoriteRecipe, request.user, pk)
+        elif request.method == 'DELETE':
+            return self.delete_obj(FavoriteRecipe, request.user, pk)
+    # @action(detail=True, methods=['post'],
+    #         permission_classes=[IsAuthenticated],
+    #         url_path='favorite')
+    # def create_favorite(self, request, pk=None):
+    #     data = {'user': request.user.id, 'recipe': pk}
+    #     serializer = FavoriteRecipeSerializer(
+    #         data=data,
+    #         context={'request': request}
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # @create_favorite.mapping.delete
+    # def delete_favorite(self, request, pk=None):
+    #     user = request.user
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     favorite = get_object_or_404(FavoriteRecipe, user=user, recipe=recipe)
+    #     favorite.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
