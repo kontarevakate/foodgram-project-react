@@ -128,7 +128,7 @@ class FollowViewSet(UserViewSet):
         user = request.user
         queryset = Follow.objects.filter(user=user)
         paginator = self.paginate_queryset(queryset)
-        serializer = CheckFollowSerializer(
+        serializer = FollowSerializer(
             paginator,
             context={'request': request},
             many=True
@@ -143,17 +143,17 @@ class FollowViewSet(UserViewSet):
 
         if user == author:
             return Response(
-                {'errors': _('Нельзя подписаться на самого себя')},
+                {'errors': ('Нельзя подписаться на самого себя')},
                 status=status.HTTP_400_BAD_REQUEST
             )
         if Follow.objects.filter(user=user, author=author).exists():
             return Response(
-                {'errors': _('Подписка уже существует')},
+                {'errors': ('Подписка уже существует')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         follow = Follow.objects.create(user=user, author=author)
-        serializer = CheckFollowSerializer(
+        serializer = FollowSerializer(
             follow, context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -168,6 +168,6 @@ class FollowViewSet(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(
-            {'errors': _('Нет подписки на этого автора')},
+            {'errors': ('Нет подписки на этого автора')},
             status=status.HTTP_400_BAD_REQUEST
         )
