@@ -22,12 +22,6 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 
-class AmountIngredients(admin.TabularInline):
-    model = IngredientAmount
-    extra = 1
-    min_num = 1
-
-
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -37,10 +31,9 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = ('name', 'author', 'tags')
     readonly_fields = ('count_favorites',)
-    
+
     def count_favorites(self, obj):
         return obj.favorites.count()
-
 
 
 class IngredientAmountAdmin(admin.ModelAdmin):

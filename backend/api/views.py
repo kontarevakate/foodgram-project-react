@@ -1,27 +1,25 @@
-#from django.db import transaction
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import HttpResponse, get_object_or_404
 from djoser.views import UserViewSet
-
-from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
-                            Recipe, ShoppingCart, Tag)
-from users.models import User, Follow
-
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
+from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                            Recipe, ShoppingCart, Tag)
+from users.models import User, Follow
+
 from .pagination import LimitPageNumberPagination
 from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import ListRetrieveViewSet
 from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
-from .serializers import (IngredientSerializer,
-                          RecipeCreateSerializer, RecipeReadSerializer,
-                          TagSerializer, 
-                          FollowSerializer, UserSubcribedSerializer, 
-                          ShortRecipeSerializer)
+from .serializers import (
+    IngredientSerializer, RecipeCreateSerializer,
+    RecipeReadSerializer, TagSerializer, FollowSerializer,
+    UserSubcribedSerializer, ShortRecipeSerializer
+)
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -65,31 +63,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         model.objects.filter(user=user, recipe__id=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # def add_obj(self, model, user, pk):
-    #     if model.objects.filter(user=user, recipe__id=pk).exists():
-    #         return Response({
-    #             'errors': 'Рецепт уже добавлен в список.'
-    #         }, status=status.HTTP_400_BAD_REQUEST)
-    #     recipe = get_object_or_404(Recipe, id=pk)
-    #     model.objects.create(user=user, recipe=recipe)
-    #     serializer = ShortRecipeSerializer(recipe)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # def delete_obj(self, model, user, pk):
-    #     obj = model.objects.filter(user=user, recipe__id=pk)
-    #     obj.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
     def favorite(self, request, pk=None):
         if request.method == 'POST':
             return self.__post(FavoriteRecipe, request.user, pk)
         elif request.method == 'DELETE':
             return self.__delete(FavoriteRecipe, request.user, pk)
-    
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
+
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
     def shopping_cart(self, request, pk=None):
         if request.method == 'POST':
             return self.__post(ShoppingCart, request.user, pk)
@@ -110,7 +97,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         return shopping_list
 
-    @action(detail=False, permission_classes=[IsAuthenticated], methods=['get'],)
+    @action(
+        detail=False, methods=['get'],
+        permission_classes=[IsAuthenticated]
+    )
     def download_shopping_cart(self, request):
         user = request.user
         if not user.list.exists():
@@ -131,8 +121,10 @@ class FollowViewSet(UserViewSet):
     serializer_class = UserSubcribedSerializer
     pagination_class = LimitPageNumberPagination
 
-    @action(detail=False, methods=['get'],
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=False, methods=['get'],
+        permission_classes=[IsAuthenticated]
+    )
     def subscriptions(self, request):
         user = request.user
         queryset = Follow.objects.filter(user=user)
@@ -144,8 +136,10 @@ class FollowViewSet(UserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post', ],
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=True, methods=['post', ],
+        permission_classes=[IsAuthenticated]
+    )
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
@@ -157,7 +151,7 @@ class FollowViewSet(UserViewSet):
             )
         if Follow.objects.filter(user=user, author=author).exists():
             return Response(
-                {'errors': ('Подписка уже существует')},
+                {'errors': ('Вы уже подписаны')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -177,6 +171,6 @@ class FollowViewSet(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(
-            {'errors': ('Нет подписки на этого автора')},
+            {'errors': ('Вы не подписывались на этого автора')},
             status=status.HTTP_400_BAD_REQUEST
         )

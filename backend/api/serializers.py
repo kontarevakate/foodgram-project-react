@@ -9,13 +9,6 @@ from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Tag)
 
 
-class ShortRecipeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = 'id', 'name', 'image', 'cooking_time'
-        read_only_fields = '__all__',
-
-
 class CustomUserCreateSerializer(UserCreateSerializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())]
@@ -49,6 +42,7 @@ class UserSubcribedSerializer(UserSerializer):
 
 
 class CheckFollowSerializer(serializers.ModelSerializer):
+
     class Meta:
         fields = ('user', 'author')
         read_only_fields = ('user',)
@@ -90,12 +84,12 @@ class FollowSerializer(UserSubcribedSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Follow
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
-    
+
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
@@ -113,6 +107,7 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
+
 
 class IngredientSerializer(serializers.ModelSerializer):
 
@@ -137,6 +132,14 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
                 fields=['ingredient', 'recipe']
             )
         ]
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = 'id', 'name', 'image', 'cooking_time'
+        read_only_fields = '__all__',
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -271,18 +274,13 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         recipe = data['recipe']
-        if FavoriteRecipe.objects.filter(user=request.user, recipe=recipe).exists():
+        if FavoriteRecipe.objects.filter(
+            user=request.user, recipe=recipe
+        ).exists():
             raise serializers.ValidationError(
                 {'errors': ('Рецепт уже в избранном!')}
             )
         return data
-
-
-class ShortRecipeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = 'id', 'name', 'image', 'cooking_time'
-        read_only_fields = '__all__',
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
