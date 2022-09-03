@@ -4,9 +4,9 @@ from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from users.models import Follow, User
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Tag)
+from users.models import Follow, User
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
