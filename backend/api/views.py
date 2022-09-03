@@ -108,7 +108,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 f'{ingredient["ingredient__name"]}: {ingredient["amount"]} '
                 f'{ingredient["ingredient__measurement_unit"]}\n'
             )
-        shopping_list += '\nFoodgram'
         return shopping_list
 
     @action(detail=False, permission_classes=[IsAuthenticated], methods=['get'],)
