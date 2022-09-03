@@ -114,7 +114,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated], methods=['get'],)
     def download_shopping_cart(self, request):
         user = request.user
-        if not user.cart.exists():
+        if not user.list.exists():
             return Response({
                 'errors': 'Ваш список покупок пуст.'
             }, status=status.HTTP_400_BAD_REQUEST
