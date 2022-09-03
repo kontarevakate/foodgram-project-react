@@ -101,38 +101,26 @@ class Recipe(models.Model):
 
 
 class IngredientAmount(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт',
-        related_name='recipe_ingredient',
-    )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингредиент',
         related_name='recipe_ingredient',
+        verbose_name='Ингредиент',
     )
-    amount = models.PositiveSmallIntegerField(
-        default=1,
-        validators=[
-            MinValueValidator(
-                1,
-                message='Минимальное кол-во ингредиентов - 1'
-            )
-        ],
-        verbose_name='Количество ингредиентов',
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name='recipe_ingredient',
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
     )
+    amount = models.PositiveIntegerField(verbose_name='Количество')
 
     class Meta:
-        verbose_name = 'Количество ингредиента'
-        verbose_name_plural = 'Количество ингредиентов'
-        ordering = ['-id']
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
         constraints = (
-            models.UniqueConstraint(
-                fields=('ingredient', 'recipe',),
-                name='unique_ingredient_amount',
-            ),
+            models.UniqueConstraint(fields=['ingredient', 'recipe'],
+                                    name='unique_ingredients_recipe'),
         )
 
 
