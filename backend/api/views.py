@@ -96,7 +96,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         elif request.method == 'DELETE':
             return self.__delete(ShoppingCart, request.user, pk)
 
-    def create_shopping_cart(user):
+    def create_shopping_cart(self, user):
         ingredients = (
             IngredientAmount.objects.filter(recipe__list__user=user)
             .values('ingredient__name', 'ingredient__measurement_unit')
