@@ -96,26 +96,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
         elif request.method == 'DELETE':
             return self.__delete(ShoppingCart, request.user, pk)
 
-    def create_shopping_cart(self, ingredients):
-        shopping_cart = '\n'.join([
-            f'{ingredient["ingredient__name"]}: {ingredient["amount"]}'
-            f'{ingredient["ingredient__measurement_unit"]}'
-            for ingredient in ingredients
-        ])
-        return shopping_cart
+    def create_shopping_cart(user):
+        ingredients = (
+            IngredientAmount.objects.filter(recipe__list__user=user)
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(amount=Sum('amount'))
+        )
+        shopping_list = f'Список покупок {user.first_name}'
+        for ingredient in ingredients:
+            shopping_list += (
+                f'{ingredient["ingredient__name"]}: {ingredient["amount"]} '
+                f'{ingredient["ingredient__measurement_unit"]}\n'
+            )
+        shopping_list += '\nFoodgram'
+        return shopping_list
 
     @action(detail=False, permission_classes=[IsAuthenticated], methods=['get'],)
     def download_shopping_cart(self, request):
-        recipes = IngredientAmount.objects.filter(
-            recipe__shopping_cart__user=request.user
+        user = request.user
+        if not user.cart.exists():
+            return Response({
+                'errors': 'Ваш список покупок пуст.'
+            }, status=status.HTTP_400_BAD_REQUEST
+            )
+        filename = f'{user.username}_shopping_list.txt'
+        shopping_list = self.create_shopping_cart(user)
+        response = HttpResponse(
+            shopping_list, content_type='text.txt; charset=utf-8'
         )
-        ingredients = recipes.values(
-            'ingredient__name',
-            'ingredient__measurement_unit',
-        ).annotate(amount=Sum('amount'))
-        shopping_cart = self.create_shopping_cart(ingredients)
-        filename = shopping_cart.pdf
-        response = HttpResponse(shopping_cart, content_type='text')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
