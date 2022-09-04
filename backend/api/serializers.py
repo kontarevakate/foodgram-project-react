@@ -4,8 +4,10 @@ from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
-                            Recipe, ShoppingCart, Tag)
+from recipes.models import (
+    FavoriteRecipe, Ingredient, IngredientAmount,
+    Recipe, ShoppingCart, Tag
+)
 from users.models import Follow, User
 
 
@@ -87,8 +89,10 @@ class FollowSerializer(UserSubcribedSerializer):
 
     class Meta:
         model = Follow
-        fields = ('id', 'email', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipes_count')
+        fields = (
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count'
+        )
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -156,9 +160,11 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text',
-                  'cooking_time')
+        fields = (
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text',
+            'cooking_time'
+        )
         read_only_fields = ('is_favorited', 'is_shopping_cart',)
 
     def get_is_favorited(self, obj):
@@ -190,8 +196,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('author', 'tags', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time')
+        fields = (
+            'author', 'tags', 'ingredients', 'name',
+            'image', 'text', 'cooking_time'
+        )
 
     def validate(self, data):
         ingredients = data['ingredients']
@@ -267,9 +275,10 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteRecipe
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
-        extra_kwargs = {'user': {'write_only': True},
-                        'recipe': {'write_only': True}
-                        }
+        extra_kwargs = {
+            'user': {'write_only': True},
+            'recipe': {'write_only': True}
+        }
 
     def validate(self, data):
         request = self.context.get('request')
