@@ -6,6 +6,7 @@ from django.db import models
 User = get_user_model()
 DEFAULT_COLOR = '#00FF00'
 
+
 class Tag(models.Model):
     name = models.CharField(
         'Имя',
