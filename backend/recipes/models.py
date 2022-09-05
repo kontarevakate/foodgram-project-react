@@ -1,10 +1,8 @@
-from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
-DEFAULT_COLOR = '#00FF00'
 
 
 class Tag(models.Model):
@@ -13,10 +11,9 @@ class Tag(models.Model):
         max_length=100,
         unique=True
     )
-    color = ColorField(
-        verbose_name='Цветовой HEX-код',
-        default=DEFAULT_COLOR,
-        format='hex',
+    color = models.CharField(
+        'Цвет',
+        max_length=7,
         unique=True
     )
     slug = models.SlugField(
